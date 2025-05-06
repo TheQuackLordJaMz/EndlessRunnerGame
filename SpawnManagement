@@ -1,0 +1,32 @@
+using UnityEngine;
+
+public class SpawnManagement : MonoBehaviour
+{
+    public GameObject coin;                                                         //ref the coin we will be spawning(for now its invisble,when we jump over box we get a point colliding with the coin)
+    public GameObject obj;                                                          //ref the obj we will be spawning
+
+    private Vector3 spawnPos = new Vector3 (20f,0f,0f);                             //start spawn pos of obj we will spawn
+    private Vector3 spawnPosCoin = new Vector3(20f, 3f, 0f);
+
+    private PlayerController pc;                                                    //ref the PlayerController
+
+   [SerializeField] public float spawnDelay = 2;                                   //time before spawn
+   [SerializeField] public float spawnRate  = 2;                                   //how frequently we spawn obj
+
+    void Start()
+    {
+        InvokeRepeating("SpawnObj", spawnDelay, spawnRate);                         //call the spawnObj function and wait for spawnDelay to spawn obj at our set spawn rate
+        pc = GameObject.Find("Player").GetComponent<PlayerController>();            //get the component Player
+      
+    }
+
+    void SpawnObj() 
+    {
+        
+        if (pc.isGameOver == false)
+        {
+            Instantiate(obj, spawnPos, obj.transform.rotation);                     //create the obj
+            Instantiate(coin, spawnPosCoin, obj.transform.rotation);
+        }
+    }
+}
