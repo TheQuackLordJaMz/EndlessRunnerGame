@@ -1,0 +1,27 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+public class MainMenu : MonoBehaviour
+{
+    //Load up and Exit the game 
+    //options and level select and credits also will be added in future
+
+    public void PlayGame() 
+    {
+        Physics.gravity = new Vector3(0f, -9.81f, 0f);//resets gravity so it isnt multiplied everytime the game is launched/restarted
+        SceneManager.LoadSceneAsync("Prototype 3");
+       
+    }
+
+    public void ToMainMenu()
+    {
+        Physics.gravity = new Vector3(0f, -9.81f, 0f); //resets gravity so it isnt multiplied everytime the game is launched/restarted
+        SceneManager.LoadSceneAsync("MainMenu");
+      
+    }
+
+    public void QuitGame()
+    {
+        Debug.Log("Game Ended");
+        Application.Quit();
+    }
+}
