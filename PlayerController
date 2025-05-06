@@ -1,0 +1,99 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using TMPro;
+
+public class PlayerController : MonoBehaviour
+{
+    [SerializeField] private Rigidbody rb;                               //ref for the rb 
+
+    [SerializeField] private float jumpForce;                            //the force of our jump
+    [SerializeField] private float gravityModifer;                       //modify the gravity
+
+    [SerializeField] private bool isOnGround = true;                     //variable to check if we on the ground
+    public  bool isGameOver = false;                                     //variable to check if the game is over
+
+    [SerializeField] private Animator playerAnim;                        //variable for out animations
+
+    public ParticleSystem particleExplosion;                             //ref for the particleEcplosion
+    public ParticleSystem dirtParticle;                                  //ref for the dirt particle
+
+    public AudioClip jumpSound;                                          //ref to our Audio clip for jumping
+    public AudioClip crashSound;                                         //ref to our Audio clip for crashing/death
+    [SerializeField] private AudioSource playerAudio;                    //ref for the audio source
+
+    [SerializeField] private int coins;                                  //coins we will display when collected eventully
+    public TextMeshProUGUI scoreText;
+   
+    
+    private void Start()
+    {
+        rb = GetComponent<Rigidbody>();                                  //get the rb component 
+        playerAudio = GetComponent<AudioSource>();                       //get our audio source component
+                                                                         //moveLeft = GameObject.Find("MoveLeft").GetComponent<MoveLeft>(); //was testing a idea leave it for now do something with it later
+
+        scoreText.text = coins.ToString() + "";                          //testing displaying score
+        
+    }
+
+   
+
+    private void Update()
+    {
+        // Jumping();
+
+        //Player Jump Input
+        if (Input.GetMouseButtonDown(0) && isOnGround && !isGameOver) //we press jump button do the below and if the game is not over
+        {
+
+            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);       //we jump up
+
+            Debug.Log("Jumping");
+            isOnGround = false;                                           //we not on ground so we cant jump in air
+            playerAnim.SetTrigger("Jump_trig");                           //play the jump animation after we press jump button
+            dirtParticle.Stop();                                          //no particles when we jump in the air
+            playerAudio.PlayOneShot(jumpSound, 1.0f);                     //plays sound when we jump 
+        }
+
+    }
+   
+
+    //check if we touching ground
+    private void OnCollisionEnter(Collision collision)
+    {
+                                                      
+        if (collision.gameObject.CompareTag("Ground")) 
+        {
+            isOnGround = true;                                             //we can now jump again
+            dirtParticle.Play();                                           //play the particle when we moving on the ground
+        }
+        else if (collision.gameObject.CompareTag("Obstacle"))
+        {
+            Camera.main.GetComponent<SimpleCameraShake>()?.TriggerShake(); //calls the camera shake script its rough but it works ,should use cinemachine in future maybe
+            isGameOver = true;                                              //game over is true we lose
+            playerAnim.SetBool("Death_b",true);                             //player our death animation
+            playerAnim.SetInteger("DeathType_int", 1);                      //set a death anim type
+            particleExplosion.Play();                                       //play the explosion 
+            dirtParticle.Stop();                                            //stops when we die
+            playerAudio.PlayOneShot(crashSound, 1.0f);                      //plays crash sound when we collide/die
+            Debug.Log("Game Over!");                                        //display messgae its game over
+            Invoke("RestartTheGame", 5);                                    //wait few seconds then game will restart (this is a temp solution works for now)
+
+        }
+        else if (collision.gameObject.CompareTag("Coin"))
+            {
+                Destroy(collision.gameObject);
+         
+            coins += 1;
+            scoreText.text = coins.ToString() + "";                         //testing displaying score
+            Debug.Log("Coins Collected" + coins);
+
+            }
+    }
+
+    void RestartTheGame() 
+    {
+        Physics.gravity = new Vector3(0f, -9.81f, 0f);                      //resets gravity so it isnt multiplied everytime the game is launched/restarted
+        SceneManager.LoadSceneAsync("MainMenu");
+        
+    }
+}
